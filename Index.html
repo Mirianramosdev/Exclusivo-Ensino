@@ -90,6 +90,41 @@ gap: 15px;
 display: flex;
 align-items: center;
 gap: 10px;
+position: relative;
+}
+
+.user-dropdown {
+position: absolute;
+top: 100%;
+right: 0;
+background: white;
+box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+border-radius: 5px;
+width: 200px;
+z-index: 101;
+display: none;
+}
+
+.user-dropdown.active {
+display: block;
+}
+
+.user-dropdown a {
+display: block;
+padding: 12px 15px;
+color: var(--secondary-color);
+text-decoration: none;
+transition: all 0.3s;
+border-bottom: 1px solid #f5f5f5;
+}
+
+.user-dropdown a:last-child {
+border-bottom: none;
+}
+
+.user-dropdown a:hover {
+background-color: var(--light-color);
+color: var(--primary-color);
 }
 
 .user-avatar {
@@ -685,7 +720,8 @@ font-size: 1.2rem;
 position: fixed;
 top: 0;
 right: -400px;
-width: 350px;
+width: 100%;
+max-width: 350px;
 height: 100vh;
 background-color: white;
 box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
@@ -1219,6 +1255,150 @@ opacity: 1;
 visibility: visible;
 }
 
+/* Área do Aluno */
+.student-area {
+display: none;
+padding: 60px 0;
+}
+
+.student-dashboard {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+gap: 25px;
+margin-bottom: 40px;
+}
+
+.student-card {
+background-color: white;
+border-radius: 10px;
+padding: 25px;
+box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+transition: transform 0.3s;
+}
+
+.student-card:hover {
+transform: translateY(-5px);
+}
+
+.student-card h3 {
+color: var(--primary-color);
+margin-bottom: 15px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.student-card h3 i {
+font-size: 1.5rem;
+}
+
+.student-card p {
+color: #666;
+margin-bottom: 15px;
+}
+
+.course-list {
+list-style: none;
+}
+
+.course-item {
+padding: 15px;
+border-bottom: 1px solid #eee;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.course-item:last-child {
+border-bottom: none;
+}
+
+.course-item a {
+color: var(--primary-color);
+text-decoration: none;
+font-weight: 500;
+}
+
+.course-progress {
+background-color: #f0f0f0;
+height: 8px;
+border-radius: 4px;
+margin-top: 8px;
+overflow: hidden;
+}
+
+.progress-bar {
+height: 100%;
+background-color: var(--primary-color);
+border-radius: 4px;
+}
+
+/* Painel Administrativo */
+.admin-panel {
+display: none;
+padding: 60px 0;
+}
+
+.admin-tabs {
+display: flex;
+border-bottom: 1px solid #ddd;
+margin-bottom: 30px;
+}
+
+.admin-tab {
+padding: 15px 25px;
+cursor: pointer;
+border-bottom: 3px solid transparent;
+font-weight: 500;
+}
+
+.admin-tab.active {
+border-bottom: 3px solid var(--primary-color);
+color: var(--primary-color);
+}
+
+.admin-content {
+display: none;
+}
+
+.admin-content.active {
+display: block;
+}
+
+.admin-table {
+width: 100%;
+border-collapse: collapse;
+margin-bottom: 30px;
+}
+
+.admin-table th,
+.admin-table td {
+padding: 12px 15px;
+text-align: left;
+border-bottom: 1px solid #ddd;
+}
+
+.admin-table th {
+background-color: #f5f5f5;
+font-weight: 600;
+}
+
+.admin-table tr:hover {
+background-color: #f9f9f9;
+}
+
+.btn-sm {
+padding: 6px 12px;
+font-size: 0.875rem;
+}
+
+.form-upload {
+background-color: #f9f9f9;
+padding: 20px;
+border-radius: 8px;
+margin-bottom: 30px;
+}
+
 /* Responsividade */
 @media (min-width: 769px) {
 nav {
@@ -1312,7 +1492,8 @@ flex-direction: column;
 }
 
 .cart-sidebar {
-width: 300px;
+width: 100%;
+max-width: 100%;
 }
 
 .chat-bubble {
@@ -1336,6 +1517,21 @@ gap: 15px;
 
 .confirmation-actions {
 flex-direction: column;
+}
+
+.student-dashboard {
+grid-template-columns: 1fr;
+}
+
+.admin-tabs {
+flex-wrap: wrap;
+}
+
+.admin-tab {
+flex: 1;
+min-width: 120px;
+text-align: center;
+padding: 10px;
 }
 }
 </style>
@@ -1363,6 +1559,9 @@ flex-direction: column;
 <div class="form-group">
 <label for="loginPassword">Senha</label>
 <input type="password" id="loginPassword" class="form-control" required>
+</div>
+<div class="modal-footer">
+<p><a href="#" id="forgotPassword">Esqueci minha senha</a></p>
 </div>
 <button type="submit" class="btn">Entrar</button>
 <div class="modal-footer">
@@ -1399,6 +1598,26 @@ flex-direction: column;
 </div>
 </div>
 
+<!-- Modal de Recuperação de Senha -->
+<div class="modal" id="recoveryModal">
+<div class="modal-content">
+<button class="close-modal" id="closeRecoveryModal">
+<i class="fas fa-times"></i>
+</button>
+<h2 style="margin-bottom: 20px; text-align: center;">Recuperar Senha</h2>
+<form id="recoveryForm">
+<div class="form-group">
+<label for="recoveryEmail">E-mail</label>
+<input type="email" id="recoveryEmail" class="form-control" required placeholder="Digite seu e-mail cadastrado">
+</div>
+<button type="submit" class="btn">Enviar Link de Recuperação</button>
+</form>
+<div class="modal-footer">
+<p>Lembrou sua senha? <a id="backToLogin">Fazer Login</a></p>
+</div>
+</div>
+</div>
+
 <!-- Header -->
 <header>
 <div class="container">
@@ -1417,6 +1636,8 @@ flex-direction: column;
 <li><a href="#cursos">Cursos</a></li>
 <li><a href="#sobre">Sobre</a></li>
 <li><a href="#contato">Contato</a></li>
+<li id="studentAreaLink" style="display: none;"><a href="#area-aluno">Área do Aluno</a></li>
+<li id="adminPanelLink" style="display: none;"><a href="#painel-admin">Painel Admin</a></li>
 </ul>
 </nav>
 <div class="header-actions">
@@ -1425,6 +1646,12 @@ flex-direction: column;
 <i class="fas fa-user"></i>
 </div>
 <span id="userName">Entrar</span>
+<div class="user-dropdown" id="userDropdown">
+<a href="#area-aluno" id="dropdownStudentArea">Área do Aluno</a>
+<a href="#meus-dados">Meus Dados</a>
+<a href="#meus-cursos">Meus Cursos</a>
+<a href="#" id="logoutBtn">Sair</a>
+</div>
 </div>
 <div class="cart-icon" id="cartIcon">
 <i class="fas fa-shopping-cart"></i>
@@ -1564,6 +1791,288 @@ flex-direction: column;
 </div>
 </div>
 
+<!-- Área do Aluno -->
+<section class="student-area" id="area-aluno">
+<div class="container">
+<div class="section-title">
+<h2>Área do Aluno</h2>
+<p>Acesse seus cursos, materiais e acompanhe seu progresso</p>
+</div>
+
+<div class="student-dashboard">
+<div class="student-card">
+<h3><i class="fas fa-book"></i> Meus Cursos</h3>
+<p>Acesse todos os cursos que você adquiriu</p>
+<ul class="course-list" id="myCoursesList">
+<li class="course-item">
+<div>
+<a href="#">Preparação UFS 2025</a>
+<div class="course-progress">
+<div class="progress-bar" style="width: 35%"></div>
+</div>
+</div>
+<span class="badge">35%</span>
+</li>
+<li class="course-item">
+<div>
+<a href="#">Concursos Federais</a>
+<div class="course-progress">
+<div class="progress-bar" style="width: 15%"></div>
+</div>
+</div>
+<span class="badge">15%</span>
+</li>
+</ul>
+</div>
+
+<div class="student-card">
+<h3><i class="fas fa-video"></i> Aulas Ao Vivo</h3>
+<p>Próximas aulas programadas</p>
+<ul class="course-list">
+<li class="course-item">
+<div>
+<a href="#">Direito Administrativo - UFS</a>
+<div>22/10/2023 - 19:00h</div>
+</div>
+</li>
+<li class="course-item">
+<div>
+<a href="#">Português - Concursos Federais</a>
+<div>24/10/2023 - 20:00h</div>
+</div>
+</li>
+</ul>
+</div>
+
+<div class="student-card">
+<h3><i class="fas fa-download"></i> Materiais de Apoio</h3>
+<p>Materiais disponíveis para download</p>
+<ul class="course-list">
+<li class="course-item">
+<div>
+<a href="#">Apostila UFS - Direito Constitucional</a>
+<div>PDF - 2.5MB</div>
+</div>
+<button class="btn btn-sm">Download</button>
+</li>
+<li class="course-item">
+<div>
+<a href="#">Simulado UFS - Edital 2025</a>
+<div>PDF - 1.8MB</div>
+</div>
+<button class="btn btn-sm">Download</button>
+</li>
+</ul>
+</div>
+
+<div class="student-card">
+<h3><i class="fas fa-certificate"></i> Certificados</h3>
+<p>Certificados disponíveis para emissão</p>
+<ul class="course-list">
+<li class="course-item">
+<div>
+<a href="#">Curso Preparatório UFS 2025</a>
+<div>Conclusão: 15/12/2023</div>
+</div>
+<button class="btn btn-sm">Emitir</button>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Painel Administrativo -->
+<section class="admin-panel" id="painel-admin">
+<div class="container">
+<div class="section-title">
+<h2>Painel Administrativo</h2>
+<p>Gerencie alunos, cursos e conteúdos</p>
+</div>
+
+<div class="admin-tabs">
+<div class="admin-tab active" data-tab="alunos">Alunos</div>
+<div class="admin-tab" data-tab="cursos">Cursos</div>
+<div class="admin-tab" data-tab="conteudos">Conteúdos</div>
+<div class="admin-tab" data-tab="aovivo">Aulas Ao Vivo</div>
+</div>
+
+<div class="admin-content active" id="alunos-content">
+<h3>Gerenciamento de Alunos</h3>
+<table class="admin-table">
+<thead>
+<tr>
+<th>Nome</th>
+<th>E-mail</th>
+<th>Telefone</th>
+<th>Cursos</th>
+<th>Ações</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>João Silva</td>
+<td>joao@email.com</td>
+<td>(79) 99999-9999</td>
+<td>2</td>
+<td>
+<button class="btn btn-sm">Editar</button>
+<button class="btn btn-sm">Detalhes</button>
+</td>
+</tr>
+<tr>
+<td>Maria Santos</td>
+<td>maria@email.com</td>
+<td>(79) 98888-8888</td>
+<td>1</td>
+<td>
+<button class="btn btn-sm">Editar</button>
+<button class="btn btn-sm">Detalhes</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="admin-content" id="cursos-content">
+<h3>Gerenciamento de Cursos</h3>
+<button class="btn" style="margin-bottom: 20px;">Adicionar Novo Curso</button>
+<table class="admin-table">
+<thead>
+<tr>
+<th>Curso</th>
+<th>Preço</th>
+<th>Alunos</th>
+<th>Status</th>
+<th>Ações</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Preparação UFS 2025</td>
+<td>R$ 497,00</td>
+<td>150</td>
+<td>Ativo</td>
+<td>
+<button class="btn btn-sm">Editar</button>
+<button class="btn btn-sm">Conteúdo</button>
+</td>
+</tr>
+<tr>
+<td>Concursos Federais</td>
+<td>R$ 597,00</td>
+<td>89</td>
+<td>Ativo</td>
+<td>
+<button class="btn btn-sm">Editar</button>
+<button class="btn btn-sm">Conteúdo</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="admin-content" id="conteudos-content">
+<h3>Gerenciamento de Conteúdos</h3>
+<div class="form-upload">
+<h4>Upload de Material</h4>
+<div class="form-group">
+<label>Selecionar Curso</label>
+<select class="form-control">
+<option>Preparação UFS 2025</option>
+<option>Concursos Federais</option>
+<option>Concursos Estaduais</option>
+</select>
+</div>
+<div class="form-group">
+<label>Título do Material</label>
+<input type="text" class="form-control">
+</div>
+<div class="form-group">
+<label>Arquivo</label>
+<input type="file" class="form-control">
+</div>
+<button class="btn">Enviar Material</button>
+</div>
+
+<h4>Materiais Disponíveis</h4>
+<table class="admin-table">
+<thead>
+<tr>
+<th>Material</th>
+<th>Curso</th>
+<th>Data</th>
+<th>Tamanho</th>
+<th>Ações</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Apostila Direito Constitucional</td>
+<td>Preparação UFS 2025</td>
+<td>10/10/2023</td>
+<td>2.5MB</td>
+<td>
+<button class="btn btn-sm">Editar</button>
+<button class="btn btn-sm">Excluir</button>
+</td>
+</tr>
+<tr>
+<td>Simulado Português</td>
+<td>Concursos Federais</td>
+<td>05/10/2023</td>
+<td>1.2MB</td>
+<td>
+<button class="btn btn-sm">Editar</button>
+<button class="btn btn-sm">Excluir</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="admin-content" id="aovivo-content">
+<h3>Agendamento de Aulas Ao Vivo</h3>
+<button class="btn" style="margin-bottom: 20px;">Nova Aula Ao Vivo</button>
+
+<h4>Próximas Aulas</h4>
+<table class="admin-table">
+<thead>
+<tr>
+<th>Aula</th>
+<th>Curso</th>
+<th>Data/Hora</th>
+<th>Professor</th>
+<th>Ações</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Direito Administrativo</td>
+<td>Preparação UFS 2025</td>
+<td>22/10/2023 19:00</td>
+<td>Prof. Carlos Silva</td>
+<td>
+<button class="btn btn-sm">Editar</button>
+<button class="btn btn-sm">Link</button>
+</td>
+</tr>
+<tr>
+<td>Português - Verbos</td>
+<td>Concursos Federais</td>
+<td>24/10/2023 20:00</td>
+<td>Prof. Ana Santos</td>
+<td>
+<button class="btn btn-sm">Editar</button>
+<button class="btn btn-sm">Link</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
 <!-- Hero Section -->
 <section class="hero" id="home">
 <div class="container">
@@ -1667,7 +2176,7 @@ flex-direction: column;
 <div class="about-text">
 <h2>Exclusivo Ensino | Concursos Públicos</h2>
 <p>Com 14 anos de experiência no mercado de preparação para concursos públicos, o Exclusivo Ensino já ajudou centenas de alunos a conquistarem a sonhada aprovação.</p>
-<p>Localizada em Lagarto/SE, nossa equipe de professores especializados oferece material atualizado e metodologia eficaz para maximizar seu aprendizado.</p>
+<p>Localizada em Lagarto/SE, nossa equipe de professores especializados oferece material atualizado emetodologia eficaz para maximizar seu aprendizado.</p>
 <p>Nossa missão é transformar vidas através da educação de qualidade, preparando candidatos para os principais concursos do país.</p>
 </div>
 
@@ -1821,8 +2330,8 @@ flex-direction: column;
 <div class="chat-bubble" id="chatBubble">
 <div class="chat-header">
 <div class="message-avatar">
-<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAi</img src>
-
+<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNkMzJmMmYiLz48dGV4dCB4PSIzMCIgeT0iNTUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI0MCIgZmlsbD0id2hpdGUiPkVFPC90ZXh0Pjwvc3ZnPg==" alt="Exclusivo Ensino">
+</div>
 <div class="chat-header-info">
 <h4>Suporte Exclusivo</h4>
 <p>Online</p>
@@ -1831,7 +2340,7 @@ flex-direction: column;
 <div class="chat-messages" id="chatMessages">
 <div class="message bot">
 <div class="message-avatar">
-<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNkMzJmMmYiLz48dGV4dCB4PSIzMCIgeT0iNTUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI0MCIgZmlsbD0id2hpdGUiPkVFPC90ZXh0Pjwvc3ZnPg==" alt="Exclusivo Ensino">
+<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg=" alt="Exclusivo Ensino">
 </div>
 <div class="message-content">
 Olá! Sou o assistente virtual do Exclusivo Ensino. Como posso ajudá-lo hoje?
@@ -1840,14 +2349,26 @@ Olá! Sou o assistente virtual do Exclusivo Ensino. Como posso ajudá-lo hoje?
 </div>
 <div class="quick-questions">
 <p>Perguntas rápidas:</p>
-<div class="question-btn" data-question="Sobre o concurso UFS">Concurso UFS</div>
-<div class="question-btn" data-question="Valores dos cursos">Valores dos cursos</div>
-<div class="question-btn" data-question="Formas de pagamento">Formas de pagamento</div>
-<div class="question-btn" data-question="Horários das aulas">Horários das aulas</div>
+<div class="question-btn" data-question="Esqueci minha senha, como recuperar?">Recuperar Senha</div>
+<div class="question-btn" data-question="Onde encontro as aulas gravadas?">Aulas Gravadas</div>
+<div class="question-btn" data-question="O link da aula ao vivo não abre, o que faço?">Problema com Aula Ao Vivo</div>
+<div class="question-btn" data-question="Como baixo o material de apoio?">Material de Apoio</div>
+<div class="question-btn" data-question="Até quando tenho acesso ao curso?">Acesso ao Curso</div>
+<div class="question-btn" data-question="Como emitir meu certificado?">Emitir Certificado</div>
+<div class="question-btn" data-question="Quais formas de pagamento aceitam?">Formas de Pagamento</div>
+<div class="question-btn" data-question="Meu pagamento já foi confirmado?">Confirmar Pagamento</div>
+<div class="question-btn" data-question="Como alterar meus dados de cadastro?">Alterar Dados</div>
+<div class="question-btn" data-question="Posso assistir pelo celular?">Assistir pelo Celular</div>
 </div>
 <div class="chat-input">
 <input type="text" id="chatInput" placeholder="Digite sua mensagem...">
 <button id="sendMessage"><i class="fas fa-paper-plane"></i></button>
+</div>
+<div class="quick-questions">
+<p>Precisa de mais ajuda?</p>
+<button class="btn" id="whatsappRedirect" style="width: 100%; margin-top: 10px;">
+<i class="fab fa-whatsapp"></i> Falar com Atendente
+</button>
 </div>
 </div>
 <div class="chat-button" id="chatButton">
@@ -1860,17 +2381,27 @@ Olá! Sou o assistente virtual do Exclusivo Ensino. Como posso ajudá-lo hoje?
 let currentUser = null;
 let users = JSON.parse(localStorage.getItem('exclusivo_ensino_users')) || [];
 let cart = JSON.parse(localStorage.getItem('exclusivo_ensino_cart')) || [];
+let adminUsers = [
+{ id: 1, email: 'admin@exclusivoensino.com', password: 'admin123', role: 'admin' },
+{ id: 2, email: 'professor@exclusivoensino.com', password: 'prof123', role: 'teacher' }
+];
 
 // Elementos da interface
 const userMenu = document.getElementById('userMenu');
 const userAvatar = document.getElementById('userAvatar');
 const userName = document.getElementById('userName');
+const userDropdown = document.getElementById('userDropdown');
 const loginModal = document.getElementById('loginModal');
+const recoveryModal = document.getElementById('recoveryModal');
 const closeLoginModal = document.getElementById('closeLoginModal');
+const closeRecoveryModal = document.getElementById('closeRecoveryModal');
 const switchToRegister = document.getElementById('switchToRegister');
 const switchToLogin = document.getElementById('switchToLogin');
+const backToLogin = document.getElementById('backToLogin');
+const forgotPassword = document.getElementById('forgotPassword');
 const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
+const recoveryForm = document.getElementById('recoveryForm');
 const modalTabs = document.querySelectorAll('.modal-tab');
 const checkoutBtn = document.getElementById('checkoutBtn');
 const checkoutContainer = document.getElementById('checkoutContainer');
@@ -1887,6 +2418,16 @@ const confirmation = document.getElementById('confirmation');
 const step1 = document.getElementById('step1');
 const step2 = document.getElementById('step2');
 const step3 = document.getElementById('step3');
+const logoutBtn = document.getElementById('logoutBtn');
+const studentAreaLink = document.getElementById('studentAreaLink');
+const adminPanelLink = document.getElementById('adminPanelLink');
+const dropdownStudentArea = document.getElementById('dropdownStudentArea');
+const studentArea = document.getElementById('area-aluno');
+const adminPanel = document.getElementById('painel-admin');
+const adminTabs = document.querySelectorAll('.admin-tab');
+const adminContents = document.querySelectorAll('.admin-content');
+const whatsappRedirect = document.getElementById('whatsappRedirect');
+const questionButtons = document.querySelectorAll('.question-btn');
 
 // Verificar se há usuário logado
 function checkLoggedIn() {
@@ -1894,6 +2435,14 @@ const loggedUser = JSON.parse(localStorage.getItem('exclusivo_ensino_current_use
 if (loggedUser) {
 currentUser = loggedUser;
 updateUserInterface();
+
+// Verificar se é admin ou professor
+const isAdmin = adminUsers.some(admin => admin.email === currentUser.email && admin.role === 'admin');
+const isTeacher = adminUsers.some(admin => admin.email === currentUser.email && admin.role === 'teacher');
+
+if (isAdmin || isTeacher) {
+adminPanelLink.style.display = 'block';
+}
 }
 }
 
@@ -1903,10 +2452,14 @@ if (currentUser) {
 userName.textContent = currentUser.name.split(' ')[0];
 userAvatar.innerHTML = currentUser.name.charAt(0).toUpperCase();
 userAvatar.style.backgroundColor = '#4caf50';
+studentAreaLink.style.display = 'block';
+dropdownStudentArea.style.display = 'block';
 } else {
 userName.textContent = 'Entrar';
 userAvatar.innerHTML = '<i class="fas fa-user"></i>';
 userAvatar.style.backgroundColor = 'var(--primary-color)';
+studentAreaLink.style.display = 'none';
+dropdownStudentArea.style.display = 'none';
 }
 }
 
@@ -1950,9 +2503,29 @@ form.classList.remove('active');
 loginForm.classList.add('active');
 });
 
+// Abrir modal de recuperação de senha
+forgotPassword.addEventListener('click', (e) => {
+e.preventDefault();
+loginModal.classList.remove('active');
+recoveryModal.classList.add('active');
+});
+
+// Voltar para login a partir da recuperação
+backToLogin.addEventListener('click', (e) => {
+e.preventDefault();
+recoveryModal.classList.remove('active');
+loginModal.classList.add('active');
+});
+
 // Fechar modal de login
 closeLoginModal.addEventListener('click', () => {
 loginModal.classList.remove('active');
+overlay.classList.remove('active');
+});
+
+// Fechar modal de recuperação
+closeRecoveryModal.addEventListener('click', () => {
+recoveryModal.classList.remove('active');
 overlay.classList.remove('active');
 });
 
@@ -1962,10 +2535,14 @@ if (!currentUser) {
 loginModal.classList.add('active');
 overlay.classList.add('active');
 } else {
-// Futuramente abrir menu do usuário
-if (confirm('Deseja sair da sua conta?')) {
-logout();
+userDropdown.classList.toggle('active');
 }
+});
+
+// Fechar dropdown ao clicar fora
+document.addEventListener('click', (e) => {
+if (!userMenu.contains(e.target)) {
+userDropdown.classList.remove('active');
 }
 });
 
@@ -1976,6 +2553,35 @@ e.preventDefault();
 const email = document.getElementById('loginEmail').value;
 const password = document.getElementById('loginPassword').value;
 
+// Verificar se é admin
+const adminUser = adminUsers.find(u => u.email === email && u.password === password);
+if (adminUser) {
+currentUser = {
+id: adminUser.id,
+name: adminUser.role === 'admin' ? 'Administrador' : 'Professor',
+email: adminUser.email,
+role: adminUser.role
+};
+localStorage.setItem('exclusivo_ensino_current_user', JSON.stringify(currentUser));
+updateUserInterface();
+
+loginModal.classList.remove('active');
+overlay.classList.remove('active');
+
+// Se estiver no checkout, avançar para a próxima etapa
+if (checkoutContainer.style.display === 'block') {
+checkoutLoginSection.style.display = 'none';
+checkoutPaymentSection.style.display = 'block';
+confirmPaymentBtn.style.display = 'block';
+step1.classList.remove('active');
+step2.classList.add('active');
+}
+
+alert('Login realizado com sucesso!');
+return;
+}
+
+// Verificar se é usuário normal
 const user = users.find(u => u.email === email && u.password === password);
 
 if (user) {
@@ -1998,6 +2604,21 @@ step2.classList.add('active');
 alert('Login realizado com sucesso!');
 } else {
 alert('E-mail ou senha incorretos. Tente novamente.');
+}
+});
+
+// Recuperação de senha
+recoveryForm.addEventListener('submit', (e) => {
+e.preventDefault();
+
+const email = document.getElementById('recoveryEmail').value;
+
+if (users.some(u => u.email === email) || adminUsers.some(u => u.email === email)) {
+alert('Um link de recuperação foi enviado para seu e-mail. Verifique sua caixa de entrada.');
+recoveryModal.classList.remove('active');
+overlay.classList.remove('active');
+} else {
+alert('E-mail não encontrado em nossa base de dados.');
 }
 });
 
@@ -2053,10 +2674,19 @@ alert('Cadastro realizado com sucesso!');
 });
 
 // Logout
+logoutBtn.addEventListener('click', (e) => {
+e.preventDefault();
+logout();
+});
+
 function logout() {
 currentUser = null;
 localStorage.removeItem('exclusivo_ensino_current_user');
 updateUserInterface();
+userDropdown.classList.remove('active');
+studentArea.style.display = 'none';
+adminPanel.style.display = 'none';
+window.location.href = '#home';
 alert('Você saiu da sua conta.');
 }
 
@@ -2187,9 +2817,335 @@ summaryItems.appendChild(itemElement);
 checkoutTotal.textContent = `R$ ${total.toFixed(2)}`;
 }
 
+// Navegação para Área do Aluno
+studentAreaLink.addEventListener('click', (e) => {
+e.preventDefault();
+if (currentUser) {
+document.querySelector('main').style.display = 'none';
+checkoutContainer.style.display = 'none';
+confirmation.style.display = 'none';
+adminPanel.style.display = 'none';
+studentArea.style.display = 'block';
+window.scrollTo(0, 0);
+} else {
+loginModal.classList.add('active');
+overlay.classList.add('active');
+}
+});
+
+dropdownStudentArea.addEventListener('click', (e) => {
+e.preventDefault();
+if (currentUser) {
+document.querySelector('main').style.display = 'none';
+checkoutContainer.style.display = 'none';
+confirmation.style.display = 'none';
+adminPanel.style.display = 'none';
+studentArea.style.display = 'block';
+window.scrollTo(0, 0);
+userDropdown.classList.remove('active');
+}
+});
+
+// Navegação para Painel Admin
+adminPanelLink.addEventListener('click', (e) => {
+e.preventDefault();
+if (currentUser) {
+const isAdmin = adminUsers.some(admin => admin.email === currentUser.email && admin.role === 'admin');
+const isTeacher = adminUsers.some(admin => admin.email === currentUser.email && admin.role === 'teacher');
+
+if (isAdmin || isTeacher) {
+document.querySelector('main').style.display = 'none';
+checkoutContainer.style.display = 'none';
+confirmation.style.display = 'none';
+studentArea.style.display = 'none';
+adminPanel.style.display = 'block';
+window.scrollTo(0, 0);
+} else {
+alert('Acesso restrito a administradores e professores.');
+}
+}
+});
+
+// Tabs do painel admin
+adminTabs.forEach(tab => {
+tab.addEventListener('click', () => {
+const tabName = tab.getAttribute('data-tab');
+
+adminTabs.forEach(t => t.classList.remove('active'));
+tab.classList.add('active');
+
+adminContents.forEach(content => {
+content.classList.remove('active');
+});
+
+document.getElementById(`${tabName}-content`).classList.add('active');
+});
+});
+
+// Redirecionar para WhatsApp
+whatsappRedirect.addEventListener('click', () => {
+const message = "Olá, preciso de ajuda com o Exclusivo Ensino.";
+window.open(`https://wa.me/5579996632990?text=${encodeURIComponent(message)}`, '_blank');
+});
+
+// Perguntas frequentes no chat
+questionButtons.forEach(button => {
+button.addEventListener('click', () => {
+const question = button.getAttribute('data-question');
+const chatMessages = document.getElementById('chatMessages');
+
+// Adicionar pergunta do usuário
+const userMessage = document.createElement('div');
+userMessage.classList.add('message', 'user');
+userMessage.innerHTML = `
+<div class="message-avatar">
+<i class="fas fa-user" style="padding: 8px; color: #666;"></i>
+</div>
+<div class="message-content">${question}</div>
+`;
+chatMessages.appendChild(userMessage);
+
+// Resposta automática baseada na pergunta
+let response = '';
+
+switch(question) {
+case 'Esqueci minha senha, como recuperar?':
+response = 'Para recuperar sua senha, clique em "Esqueci minha senha" na tela de login. Você receberá um e-mail com instruções para redefinir sua senha.';
+break;
+case 'Onde encontro as aulas gravadas?':
+response = 'As aulas gravadas estão disponíveis na Área do Aluno, na seção "Meus Cursos". Cada curso possui sua própria biblioteca de aulas.';
+break;
+case 'O link da aula ao vivo não abre, o que faço?':
+response = 'Verifique sua conexão com a internet e tente acessar novamente. Se o problema persistir, entre em contato conosco pelo WhatsApp para suporte imediato.';
+break;
+case 'Como baixo o material de apoio?':
+response = 'Os materiais de apoio estão disponíveis para download na Área do Aluno, na seção "Materiais de Apoio" de cada curso.';
+break;
+case 'Até quando tenho acesso ao curso?':
+response = 'O acesso ao curso é vitalício após a compra. Você pode assistir às aulas quantas vezes quiser, sem prazo de expiração.';
+break;
+case 'Como emitir meu certificado?':
+response = 'Os certificados estão disponíveis na Área do Aluno, na seção "Certificados", após a conclusão de pelo menos 75% do curso.';
+break;
+case 'Quais formas de pagamento aceitam?':
+response = 'Aceitamos cartão de crédito, PIX e boleto bancário. Parcelamos em até 12x no cartão.';
+break;
+case 'Meu pagamento já foi confirmado?':
+response = 'O status do pagamento pode ser verificado na Área do Aluno. Pagamentos com cartão são confirmados em até 48h, PIX em até 24h e boleto em até 3 dias úteis.';
+break;
+case 'Como alterar meus dados de cadastro?':
+response = 'Você pode alterar seus dados na Área do Aluno, na seção "Meus Dados". Lá você atualiza e-mail, telefone e senha.';
+break;
+case 'Posso assistir pelo celular?':
+response = 'Sim! Nossa plataforma é totalmente responsiva e funciona em celulares, tablets e computadores. Baixe nosso app na Play Store ou App Store.';
+break;
+default:
+response = 'Entendi sua pergunta. Para melhor atendimento, entre em contato conosco pelo WhatsApp clicando no botão abaixo.';
+}
+
+// Adicionar resposta do bot
+setTimeout(() => {
+const botMessage = document.createElement('div');
+botMessage.classList.add('message', 'bot');
+botMessage.innerHTML = `
+<div class="message-avatar">
+<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNkMzJmMmYiLz48dGV4dCB4PSIzMCIgeT0iNTUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI0MCIgZmlsbD0id2hpdGUiPkVFPC90ZXh0Pjwvc3ZnPg==" alt="Exclusivo Ensino">
+</div>
+<div class="message-content">${response}</div>
+`;
+chatMessages.appendChild(botMessage);
+chatMessages.scrollTop = chatMessages.scrollHeight;
+}, 1000);
+
+chatMessages.scrollTop = chatMessages.scrollHeight;
+});
+});
+
 // Inicializar
 checkLoggedIn();
 updateCart();
+
+// Menu mobile
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const mainNav = document.getElementById('mainNav');
+const overlay = document.getElementById('overlay');
+
+mobileMenuBtn.addEventListener('click', () => {
+mainNav.classList.toggle('active');
+overlay.classList.toggle('active');
+
+// Corrigir o problema do menu escurecer ao clicar
+if (mainNav.classList.contains('active')) {
+mobileMenuBtn.innerHTML = '<i class="fas fa-times"></i>';
+document.body.style.overflow = 'hidden';
+} else {
+mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+document.body.style.overflow = 'auto';
+}
+});
+
+// Fechar menu ao clicar no overlay
+overlay.addEventListener('click', () => {
+mainNav.classList.remove('active');
+overlay.classList.remove('active');
+mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+document.body.style.overflow = 'auto';
+
+// Fechar modais também
+loginModal.classList.remove('active');
+recoveryModal.classList.remove('active');
+userDropdown.classList.remove('active');
+});
+
+// Carrinho
+const cartIcon = document.getElementById('cartIcon');
+const cartSidebar = document.getElementById('cartSidebar');
+const closeCart = document.getElementById('closeCart');
+
+cartIcon.addEventListener('click', () => {
+cartSidebar.classList.add('active');
+overlay.classList.add('active');
+});
+
+closeCart.addEventListener('click', () => {
+cartSidebar.classList.remove('active');
+overlay.classList.remove('active');
+});
+
+// Chat
+const chatButton = document.getElementById('chatButton');
+const chatBubble = document.getElementById('chatBubble');
+const sendMessage = document.getElementById('sendMessage');
+const chatInput = document.getElementById('chatInput');
+
+chatButton.addEventListener('click', () => {
+chatBubble.classList.toggle('active');
+});
+
+sendMessage.addEventListener('click', () => {
+if (chatInput.value.trim() !== '') {
+const chatMessages = document.getElementById('chatMessages');
+
+// Adicionar mensagem do usuário
+const userMessage = document.createElement('div');
+userMessage.classList.add('message', 'user');
+userMessage.innerHTML = `
+<div class="message-avatar">
+<i class="fas fa-user" style="padding: 8px; color: #666;"></i>
+</div>
+<div class="message-content">${chatInput.value}</div>
+`;
+chatMessages.appendChild(userMessage);
+
+// Resposta automática
+setTimeout(() => {
+const botMessage = document.createElement('div');
+botMessage.classList.add('message', 'bot');
+botMessage.innerHTML = `
+<div class="message-avatar">
+<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNkMzJmMmYiLz48dGV4dCB4PSIzMCIgeT0iNTUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI0MCIgZmlsbD0id2hpdGUiPkVFPC90ZXh0Pjwvc3ZnPg==" alt="Exclusivo Ensino">
+</div>
+<div class="message-content">Obrigado pela sua mensagem. Nossa equipe entrará em contato em breve. Para atendimento imediato, clique no botão do WhatsApp abaixo.</div>
+`;
+chatMessages.appendChild(botMessage);
+chatMessages.scrollTop = chatMessages.scrollHeight;
+}, 1000);
+
+chatInput.value = '';
+chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+});
+
+chatInput.addEventListener('keypress', (e) => {
+if (e.key === 'Enter') {
+sendMessage.click();
+}
+});
+
+// Adicionar ao carrinho
+const addToCartButtons = document.querySelectorAll('.add-to-cart');
+
+addToCartButtons.forEach(button => {
+button.addEventListener('click', () => {
+const id = button.getAttribute('data-id');
+const name = button.getAttribute('data-name');
+const price = parseFloat(button.getAttribute('data-price'));
+
+// Verificar se o item já está no carrinho
+const existingItem = cart.find(item => item.id === id);
+
+if (existingItem) {
+existingItem.quantity += 1;
+} else {
+cart.push({
+id,
+name,
+price,
+quantity: 1
+});
+}
+
+localStorage.setItem('exclusivo_ensino_cart', JSON.stringify(cart));
+updateCart();
+
+alert(`${name} foi adicionado ao carrinho!`);
+});
+});
+
+// Atualizar carrinho
+function updateCart() {
+const cartItems = document.getElementById('cartItems');
+const cartCount = document.querySelector('.cart-count');
+const cartTotal = document.getElementById('cartTotal');
+
+cartCount.textContent = cart.reduce((total, item) => total + item.quantity, 0);
+
+if (cart.length === 0) {
+cartItems.innerHTML = `
+<div class="empty-cart">
+<i class="fas fa-shopping-cart" style="font-size: 3rem; margin-bottom: 15px;"></i>
+<p>Seu carrinho está vazio</p>
+</div>
+`;
+cartTotal.textContent = 'R$ 0,00';
+} else {
+cartItems.innerHTML = '';
+let total = 0;
+
+cart.forEach(item => {
+const itemTotal = item.price * item.quantity;
+total += itemTotal;
+
+const cartItem = document.createElement('div');
+cartItem.classList.add('cart-item');
+cartItem.innerHTML = `
+<div class="cart-item-img" style="background-image: url('https://images.unsplash.com/photo-1560785496-3c9d27877182?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80');"></div>
+<div class="cart-item-details">
+<div class="cart-item-title">${item.name}</div>
+<div class="cart-item-price">R$ ${item.price.toFixed(2)}</div>
+</div>
+<button class="remove-item" data-id="${item.id}">
+<i class="fas fa-times"></i>
+</button>
+`;
+
+cartItems.appendChild(cartItem);
+});
+
+cartTotal.textContent = `R$ ${total.toFixed(2)}`;
+
+// Adicionar event listeners para remover itens
+const removeButtons = document.querySelectorAll('.remove-item');
+removeButtons.forEach(button => {
+button.addEventListener('click', () => {
+const itemId = button.getAttribute('data-id');
+cart = cart.filter(item => item.id !== itemId);
+localStorage.setItem('exclusivo_ensino_cart', JSON.stringify(cart));
+updateCart();
+});
+});
+}
+}
 </script>
 </body>
 </html>
